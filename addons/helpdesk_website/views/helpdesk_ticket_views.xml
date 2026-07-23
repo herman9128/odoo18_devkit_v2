@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View Inheritance: Hide Company & Team -->
+    <record id="view_helpdesk_ticket_form_inherit_custom" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form.inherit.custom</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="invisible">True</attribute>
+                <attribute name="required">False</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='team_id']" position="attributes">
+                <attribute name="invisible">True</attribute>
+                <attribute name="required">False</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

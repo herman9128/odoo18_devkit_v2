@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="contact_support_page_template" name="Contact Support Form">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <!-- Removed 's_website_form' snippet classes to prevent JS binding errors -->
+                <section class="pt32 pb32">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 offset-lg-2">
+                                <h1 class="mb-4">Submit a Support Ticket</h1>
+                                
+                                <form action="/contact-support/submit" 
+                                      method="post" 
+                                      enctype="multipart/form-data">
+                                    
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    
+                                    <!-- Ticket Subject -->
+                                    <div class="mb-3">
+                                        <label class="form-label" for="name">Message Subject *</label>
+                                        <input type="text" id="name" class="form-control" name="name" required="1"/>
+                                    </div>
+
+                                    <!-- Customer Email -->
+                                    <div class="mb-3">
+                                        <label class="form-label" for="partner_email">Email Address *</label>
+                                        <input type="email" 
+                                               id="partner_email" 
+                                               class="form-control" 
+                                               name="partner_email" 
+                                               t-att-value="request.env.user.partner_id.email if not request.env.user._is_public() else ''"
+                                               required="1"/>
+                                    </div>
+
+                                    <!-- Mobile Phone -->
+                                    <div class="mb-3">
+                                        <label class="form-label" for="mobile_phone">Mobile Phone</label>
+                                        <input type="tel" 
+                                               id="mobile_phone" 
+                                               class="form-control" 
+                                               name="mobile_phone"
+                                               t-att-value="request.env.user.partner_id.phone or request.env.user.partner_id.mobile if not request.env.user._is_public() else ''"/>
+                                    </div>
+
+                                    <!-- Ticket Description -->
+                                    <div class="mb-3">
+                                        <label class="form-label" for="description">Ask Your Question *</label>
+                                        <textarea id="description" class="form-control" name="description" rows="5" required="1"></textarea>
+                                    </div>
+
+                                    <!-- File / Screenshot Attachment Field -->
+                                    <div class="mb-3">
+                                        <label class="form-label" for="attachment">Attach Screenshot or Document</label>
+                                        <input type="file" id="attachment" name="attachment" class="form-control" accept="image/*,application/pdf"/>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="mb-3">
+                                        <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

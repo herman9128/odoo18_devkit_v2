@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="helpdesk_mgmt.model_helpdesk_ticket" model="ir.model">
+            <field name="website_form_key">create_oca_ticket</field>
+            <field name="website_form_access">True</field>
+            <field name="website_form_label">Submit Support Ticket (OCA)</field>
+        </record>
+    </data>
+</odoo>

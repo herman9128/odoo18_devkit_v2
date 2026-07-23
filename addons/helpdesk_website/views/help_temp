@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 1. Form View Inherit: Hide Team/Company & Add Mobile Phone -->
+    <record id="view_helpdesk_ticket_form_inherit_custom" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form.inherit.custom</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Hide Company field -->
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="required">0</attribute>
+            </xpath>
+
+            <!-- Hide Team field -->
+            <xpath expr="//field[@name='team_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="required">0</attribute>
+            </xpath>
+
+            <!-- Add custom Mobile Phone field right after partner_email -->
+            <xpath expr="//field[@name='partner_email']" position="after">
+                <field name="mobile_phone" widget="phone"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- 2. Tree View Inherit: Safe target using name field -->
+    <record id="view_helpdesk_ticket_tree_inherit_custom" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.tree.inherit.custom</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_tree"/>
+        <field name="arch" type="xml">
+
+            <!-- Target 'name' field which exists in all ticket tree views -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="mobile_phone"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

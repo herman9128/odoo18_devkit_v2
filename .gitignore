@@ -1,0 +1,14 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Odoo logs & temporary files
+*.log
+*.pot
+
+# OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
