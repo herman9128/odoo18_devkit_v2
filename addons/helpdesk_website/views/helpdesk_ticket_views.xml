@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Form View Inheritance: Hide Company & Team -->
+    <!-- Form View Inheritance: Custom Helpdesk Fields -->
     <record id="view_helpdesk_ticket_form_inherit_custom" model="ir.ui.view">
         <field name="name">helpdesk.ticket.form.inherit.custom</field>
         <field name="model">helpdesk.ticket</field>
         <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_form"/>
         <field name="arch" type="xml">
             
+            <!-- Relabel Assigned User to Support Specialist -->
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="string">Support Specialist</attribute>
+            </xpath>
+
+            <!-- Add Action, Status, Action Taken, and Supervision under Support Specialist -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="action_type"/>
+                <field name="ticket_status"/>
+                <field name="action_taken" placeholder="Describe the steps or resolution taken by the technician..."/>
+                <field name="supervision" placeholder="Add supervisor notes or review status..."/>
+            </xpath>
+
+            <!-- Hide Channel field -->
+            <xpath expr="//field[@name='channel_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="required">0</attribute>
+            </xpath>
+
+            <!-- Hide Company & Team -->
             <xpath expr="//field[@name='company_id']" position="attributes">
-                <attribute name="invisible">True</attribute>
-                <attribute name="required">False</attribute>
+                <attribute name="invisible">1</attribute>
+                <attribute name="required">0</attribute>
             </xpath>
 
             <xpath expr="//field[@name='team_id']" position="attributes">
-                <attribute name="invisible">True</attribute>
-                <attribute name="required">False</attribute>
+                <attribute name="invisible">1</attribute>
+                <attribute name="required">0</attribute>
             </xpath>
 
         </field>
     </record>
-    
+
+
     <record id="view_helpdesk_ticket_form_inherit_site_office" model="ir.ui.view">
     <field name="name">helpdesk.ticket.form.inherit.site.office</field>
     <field name="model">helpdesk.ticket</field>
@@ -31,6 +52,25 @@
             <field name="mobile_phone"/>
         </xpath>
     </field>
-</record>
+    </record>
 
+    <!-- Tree / List View Inheritance: Reorder Status and Support Specialist -->
+    <record id="view_helpdesk_ticket_tree_inherit_custom" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.tree.inherit.custom</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_tree"/>
+        <field name="arch" type="xml">
+
+            <!-- Relabel user_id column header in List view if needed -->
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="string">Support Specialist</attribute>
+            </xpath>
+
+            <!-- Insert your custom ticket_status before user_id -->
+            <xpath expr="//field[@name='user_id']" position="before">
+                <field name="ticket_status" widget="badge" decoration-info="ticket_status == 'pending'" decoration-warning="ticket_status in ('in_progress', 'waiting_part')" decoration-danger="ticket_status == 'escalated'" decoration-success="ticket_status == 'resolved'"/>
+            </xpath>
+
+        </field>
+    </record>
 </odoo>
