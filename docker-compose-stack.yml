@@ -1,16 +1,18 @@
 version: '3.8'
+
 services:
   web:
     image: odoo:18.0
+    restart: always
     depends_on:
       - db
       - mailpit
     ports:
       - "8080:8069"
+      - "8072:8072"
     volumes:
       - odoo-web-data:/var/lib/odoo
-      - ./odoo18-devkit-v2/addons:/mnt/extra-addons
-
+      - /home/odoo18_v2/addons:/mnt/extra-addons
     environment:
       - HOST=db
       - USER=odoo
@@ -18,18 +20,20 @@ services:
 
   db:
     image: postgres:15
+    restart: always
     environment:
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=odoo
       - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
 
   mailpit:
     image: axllent/mailpit
+    restart: always
     ports:
-      - "1025:1025" # SMTP server port
-      - "8025:8025" # Web UI dashboard port
+      - "1026:1025" # Remapped SMTP host port to 1026
+      - "8026:8025" # Remapped Web UI host port to 8026
 
 volumes:
   odoo-web-data:
