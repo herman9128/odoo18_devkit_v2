@@ -1,78 +1,146 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <template id="contact_support_page_template" name="Contact Support Form">
         <t t-call="website.layout">
+            <!-- Ensure Mobile Viewport meta tag is present -->
+            <xpath expr="//head" position="inside">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+            </xpath>
+
             <div id="wrap" class="oe_structure oe_empty">
-                <section class="pt32 pb32">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-8 offset-lg-2">
-                                <h1 class="mb-4">Submit a Support Ticket</h1>
+                <section class="pt16 pb16 pt-md-32 pb-md-32">
+                    <div class="container px-3 px-md-0">
+                        <div class="row justify-content-center">
+                            <!-- col-12 ensures 100% width on mobile, col-lg-8 centers on desktop -->
+                            <div class="col-12 col-md-10 col-lg-8">
+                                <h1 class="mb-4 text-center text-md-start fs-2 fs-md-1">Submit a Support Ticket</h1>
                                 
-                                <form action="/contact-support/submit" method="post" enctype="multipart/form-data">
-                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                    
-                                    <!-- Message Subject -->
-                                    <div class="mb-3">
-                                        <label class="form-label" for="name">Message Subject *</label>
-                                        <input type="text" id="name" name="name" class="form-control" required="required"/>
-                                    </div>
+                                <form
+                                    action="/contact-support/submit"
+                                    method="post"
+                                    enctype="multipart/form-data"
+                                >
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        t-att-value="request.csrf_token()"
+                                    />
 
                                     <!-- Requestor Name & Email -->
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="partner_name">Requestor Name *</label>
-                                            <input type="text" 
-                                                   id="partner_name" 
-                                                   name="partner_name" 
-                                                   class="form-control" 
-                                                   t-att-value="request.env.user.partner_id.name if not request.env.user._is_public() else ''"
-                                                   required="required"/>
+                                        <div class="col-12 col-md-6 mb-3">
+                                            <label
+                                                class="form-label fw-bold"
+                                                for="partner_name"
+                                            >Requestor Name *</label>
+                                            <input
+                                                type="text"
+                                                id="partner_name"
+                                                name="partner_name"
+                                                class="form-control form-control-lg-style"
+                                                t-att-value="request.env.user.partner_id.name if not request.env.user._is_public() else ''"
+                                                required="required"
+                                            />
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="partner_email">Email Address *</label>
-                                            <input type="email" 
-                                                   id="partner_email" 
-                                                   name="partner_email" 
-                                                   class="form-control" 
-                                                   t-att-value="request.env.user.partner_id.email if not request.env.user._is_public() else ''"
-                                                   required="required"/>
+                                        <div class="col-12 col-md-6 mb-3">
+                                            <label
+                                                class="form-label fw-bold"
+                                                for="partner_email"
+                                            >Email Address *</label>
+                                            <input
+                                                type="email"
+                                                id="partner_email"
+                                                name="partner_email"
+                                                class="form-control"
+                                                t-att-value="request.env.user.partner_id.email if not request.env.user._is_public() else ''"
+                                                required="required"
+                                            />
                                         </div>
                                     </div>
 
                                     <!-- Site Office & Mobile Phone -->
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="site_office">Site Office</label>
-                                            <input type="text" 
-                                                   id="site_office" 
-                                                   name="site_office" 
-                                                   class="form-control" 
-                                                   placeholder="e.g. Building A, Room 302"/>
+                                        <div class="col-12 col-md-6 mb-3">
+                                            <label
+                                                class="form-label fw-bold"
+                                                for="site_office"
+                                            >Site Office</label>
+                                            <input
+                                                type="text"
+                                                id="site_office"
+                                                name="site_office"
+                                                class="form-control"
+                                                placeholder="e.g. Building A, Room 302"
+                                            />
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="mobile_phone">Mobile Phone</label>
-                                            <input type="tel" 
-                                                   id="mobile_phone" 
-                                                   name="mobile_phone" 
-                                                   class="form-control" 
-                                                   t-att-value="request.env.user.partner_id.phone or request.env.user.partner_id.mobile if not request.env.user._is_public() else ''"/>
+                                        <div class="col-12 col-md-6 mb-3">
+                                            <label
+                                                class="form-label fw-bold"
+                                                for="mobile_phone"
+                                            >Mobile Phone</label>
+                                            <input
+                                                type="tel"
+                                                id="mobile_phone"
+                                                name="mobile_phone"
+                                                class="form-control"
+                                                t-att-value="request.env.user.partner_id.phone or request.env.user.partner_id.mobile if not request.env.user._is_public() else ''"
+                                            />
                                         </div>
+                                    </div>
+
+                                    <!-- Message Subject -->
+                                    <div class="mb-3">
+                                        <label
+                                            class="form-label fw-bold"
+                                            for="name"
+                                        >Message Subject *</label>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            class="form-control"
+                                            required="required"
+                                        />
                                     </div>
 
                                     <!-- Description -->
                                     <div class="mb-3">
-                                        <label class="form-label" for="description">Ask Your Question *</label>
-                                        <textarea id="description" name="description" class="form-control" rows="5" required="required"></textarea>
+                                        <label
+                                            class="form-label fw-bold"
+                                            for="description"
+                                        >Ask Your Question *</label>
+                                        <textarea
+                                            id="description"
+                                            name="description"
+                                            class="form-control"
+                                            rows="5"
+                                            required="required"
+                                        />
                                     </div>
 
                                     <!-- Attachments -->
-                                    <div class="mb-3">
-                                        <label class="form-label" for="attachment">Attach Screenshot or Document</label>
-                                        <input type="file" id="attachment" name="attachment" class="form-control" multiple="multiple" accept="image/*,application/pdf"/>
+                                    <div class="mb-4">
+                                        <label
+                                            class="form-label fw-bold"
+                                            for="attachment"
+                                        >Attach Screenshot or Document</label>
+                                        <input
+                                            type="file"
+                                            id="attachment"
+                                            name="attachment"
+                                            class="form-control"
+                                            multiple="multiple"
+                                            accept="image/*,application/pdf"
+                                        />
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                                    <!-- Submit Button (Full width on mobile, auto width on desktop) -->
+                                    <div class="d-grid d-md-block">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary btn-lg px-4"
+                                        >Submit Ticket</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -82,17 +150,31 @@
         </t>
     </template>
     
-    <template id="ticket_submitted_success" name="Ticket Submitted Successfully">
-    <t t-call="website.layout">
-        <div id="wrap" class="oe_structure oe_empty">
-            <div class="container my-5 text-center">
-                <div class="alert alert-success p-4">
-                    <h3>Thank you!</h3>
-                    <p>Your support ticket <strong>#<t t-esc="ticket.id"/></strong> has been submitted successfully.</p>
+    <template
+        id="ticket_submitted_success"
+        name="Ticket Submitted Successfully"
+    >
+        <t t-call="website.layout">
+            <xpath expr="//head" position="inside">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            </xpath>
+
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="container my-5 text-center px-3">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-8 col-lg-6">
+                            <div class="alert alert-success p-4 shadow-sm">
+                                <h3 class="alert-heading">Thank you!</h3>
+                                <p class="mb-0">Your support ticket <strong>#<t t-esc="ticket.id"/></strong> has been submitted successfully.</p>
+                            </div>
+                            <a
+                                href="/contact-support"
+                                class="btn btn-primary btn-lg mt-3 w-100 w-md-auto"
+                            >Submit Another Ticket</a>
+                        </div>
+                    </div>
                 </div>
-                <a href="/contact-support" class="btn btn-primary mt-3">Submit Another Ticket</a>
             </div>
-        </div>
-    </t>
-</template>
+        </t>
+    </template>
 </odoo>

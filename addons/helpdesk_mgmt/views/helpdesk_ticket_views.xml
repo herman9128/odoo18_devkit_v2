@@ -1,31 +1,27 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record
-        id="action_helpdesk_ticket_kanban_from_dashboard"
-        model="ir.actions.act_window"
-    >
+    <record id="action_helpdesk_ticket_kanban_from_dashboard" model="ir.actions.act_window">
         <field name="name">Helpdesk Ticket</field>
         <field name="res_model">helpdesk.ticket</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="context">
-            {'default_team_id': active_id}
-        </field>
+        <field name="context">{'default_team_id': active_id}</field>
         <field name="domain">[('team_id', '=', active_id)]</field>
     </record>
+
     <record id="helpdesk_ticket_action_unassigned" model="ir.actions.act_window">
         <field name="name">Helpdesk Ticket</field>
         <field name="res_model">helpdesk.ticket</field>
         <field name="view_mode">kanban,list,form</field>
-        <field
-            name="domain"
-        >[('team_id', '=', False), ("stage_id.closed", "=", False)]</field>
+        <field name="domain">[('team_id', '=', False), ("stage_id.closed", "=", False)]</field>
     </record>
+
     <record id="helpdesk_ticket_action_opened" model="ir.actions.act_window">
         <field name="name">Helpdesk Ticket</field>
         <field name="res_model">helpdesk.ticket</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[("stage_id.closed", "=", False)]</field>
     </record>
+
     <record id="helpdesk_ticket_view_search" model="ir.ui.view">
         <field name="name">helpdesk.ticket.view.search</field>
         <field name="model">helpdesk.ticket</field>
@@ -104,8 +100,7 @@
                 <filter
                     string="Future Activities"
                     name="activities_upcoming_all"
-                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
-                  ]"
+                    domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"
                 />
                 <group expand="0" string="Group By">
                     <filter
@@ -154,6 +149,7 @@
             </search>
         </field>
     </record>
+
     <record id="ticket_view_form" model="ir.ui.view">
         <field name="name">helpdesk.ticket.view.form</field>
         <field name="model">helpdesk.ticket</field>
@@ -212,11 +208,11 @@
                             role="alert"
                             name="warning_duplicate"
                             invisible="not duplicate_id"
-                        > This ticket is a
-                            duplicate of <field
-                            name="duplicate_id"
-                            readonly="stage_id.closed"
-                        />
+                        > This ticket is a duplicate of 
+                            <field
+                                name="duplicate_id"
+                                readonly="stage_id.closed"
+                            />
                         </div>
                         <h1 class="oe_title">
                             <field name="number" />
@@ -237,11 +233,6 @@
                                 widget="many2one_avatar_user"
                             />
                             <field name="priority" widget="priority" />
-                            <field
-                                name="company_id"
-                                options="{'no_create': True}"
-                                groups="base.group_multi_company"
-                            />
                             <field name="create_date" readonly="1" />
                             <field name="channel_id" />
                         </group>
@@ -253,6 +244,13 @@
                             <field name="partner_name" />
                             <field name="partner_email" />
                             <field name="category_id" />
+                           
+                            <field
+                               name="company_id"
+                               options="{'no_create': True}"
+                               groups="base.group_multi_company"
+                               invisible="1"
+                            />
                             <field
                                 name="tag_ids"
                                 widget="many2many_tags"
@@ -278,6 +276,7 @@
             </form>
         </field>
     </record>
+
     <record id="ticket_view_tree" model="ir.ui.view">
         <field name="name">helpdesk.ticket.view.list</field>
         <field name="model">helpdesk.ticket</field>
@@ -321,6 +320,7 @@
             </list>
         </field>
     </record>
+
     <record id="view_helpdesk_ticket_kanban" model="ir.ui.view">
         <field name="name">helpdesk.ticket.kanban</field>
         <field name="model">helpdesk.ticket</field>
@@ -396,6 +396,7 @@
             </kanban>
         </field>
     </record>
+
     <record id="helpdesk_ticket_views_pivot" model="ir.ui.view">
         <field name="name">helpdesk.ticket.view.pivot</field>
         <field name="model">helpdesk.ticket</field>
@@ -406,6 +407,7 @@
             </pivot>
         </field>
     </record>
+
     <record id="action_duplicate_ticket" model="ir.actions.server">
         <field name="name">Duplicate</field>
         <field name="model_id" ref="model_helpdesk_ticket" />
@@ -416,6 +418,7 @@
             action = model.action_duplicate_tickets()
         </field>
     </record>
+
     <record id="model_helpdesk_ticket_action_share" model="ir.actions.server">
         <field name="name">Share</field>
         <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket" />
@@ -423,5 +426,17 @@
         <field name="binding_view_types">form</field>
         <field name="state">code</field>
         <field name="code">action = records.action_share()</field>
+    </record>
+
+    <record id="ticket_view_form_inherit_company" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form.inherit.company</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.ticket_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Hide the existing company_id field in the base view -->
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
     </record>
 </odoo>

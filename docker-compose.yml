@@ -9,7 +9,7 @@ services:
       - "8080:8069"
     volumes:
       - odoo-web-data:/var/lib/odoo
-      - ./odoo18-devkit-v2/addons:/mnt/extra-addons
+      - ./addons:/mnt/extra-addons
 
     environment:
       - HOST=db
