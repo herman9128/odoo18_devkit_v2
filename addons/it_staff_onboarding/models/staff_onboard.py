@@ -26,7 +26,11 @@ class ITStaffOnboard(models.Model):
     initial_password = fields.Char(string='Initial Password')
     project_email = fields.Char(string='Project Email')
     m365_license_assigned = fields.Boolean(string='M365 License Assigned')
-    m365_license_type = fields.Char(string='M365 License Type')
+    m365_license_type = fields.Selection([
+        ('business_standard', 'M365 Business Standard'),
+        ('business_premium', 'M365 Business Premium'),
+        ('exchange_online', 'Exchange On-line'),
+    ], string='M365 License Type')
     computer_assigned = fields.Char(string='Computer Assigned')
     remark = fields.Text(string='Remark')
 
