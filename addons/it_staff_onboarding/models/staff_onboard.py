@@ -1,9 +1,10 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
 
 class ITStaffOnboard(models.Model):
     _name = 'it.staff.onboard'
     _description = 'IT Staff Onboarding'
-    # REQUIRED: Add mail thread inheritance so <chatter/> works
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     # 1. Primary Fields
@@ -67,6 +68,13 @@ class ITStaffOnboard(models.Model):
                 rec.count_onboard = 0
                 rec.count_offboard = 0
 
+    # Sequence Generation on Create
+    @api.model
+    def create(self, vals):
+        if vals.get('sequence_number', 'New') == 'New':
+            vals['sequence_number'] = self.env['ir.sequence'].next_by_code('it.staff.onboard') or 'New'
+        return super(ITStaffOnboard, self).create(vals)
+
     def action_activate(self):
         self.write({'status': 'active'})
 
@@ -77,4 +85,34 @@ class ITStaffOnboard(models.Model):
         self.write({'status': 'active'})
 
     def action_send_supervisor_email(self):
-        pass
+        """Triggers the XML template email to the supervisor."""
+        self.ensure_one()
+        
+        if not self.supervisor_email:
+            raise UserError(_("Please specify a Supervisor Email address before sending!"))
+
+        # Look up the mail template by its XML ID
+        template = self.env.ref('it_staff_onboarding.email_template_supervisor_onboard_notice', raise_if_not_found=False)
+        
+        if not template:
+            raise UserError(_("Email template 'email_template_supervisor_onboard_notice' could not be found."))
+
+        # Send email immediately using the template context
+        template.send_mail(self.id, force_send=True)
+
+        # Log confirmation in Chatter
+        self.message_post(
+            body=_("Onboarding notification email sent to supervisor: <b>%s</b>") % self.supervisor_email,
+            subject=_("Supervisor Email Dispatched")
+        )
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Email Sent"),
+                'message': _("Notification has been sent to %s") % self.supervisor_email,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
