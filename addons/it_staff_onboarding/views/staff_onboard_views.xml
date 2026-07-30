@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 1. List View -->
+    <record id="view_it_staff_onboard_tree" model="ir.ui.view">
+        <field name="name">it.staff.onboard.list</field>
+        <field name="model">it.staff.onboard</field>
+        <field name="arch" type="xml">
+            <list string="Staff Onboarding Records">
+                <field name="sequence_number"/>
+                <field name="employee_number"/>
+                <field name="staff_name"/>
+                <field name="position"/>
+                <field name="work_location"/>
+                <field name="commence_date"/>
+                <field name="email_login"/>
+                <field name="supervisor_email"/>
+                <field name="status" widget="badge" 
+                       decoration-info="status == 'draft'" 
+                       decoration-success="status == 'active'" 
+                       decoration-danger="status == 'resigned'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 2. Form View -->
+    <record id="view_it_staff_onboard_form" model="ir.ui.view">
+        <field name="name">it.staff.onboard.form</field>
+        <field name="model">it.staff.onboard</field>
+        <field name="arch" type="xml">
+            <form string="Staff Onboarding Record">
+                <header>
+                    <button name="action_activate" type="object" string="Confirm Onboard" class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_send_supervisor_email" type="object" string="Send Email to Supervisor" class="btn-primary" icon="fa-envelope"/>
+                    <button name="action_resign" type="object" string="Mark as Resigned" class="btn-danger" invisible="status == 'resigned'"/>
+                    <button name="action_reactivate" type="object" string="Reactivate Staff" class="btn-warning" invisible="status == 'resigned'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,active,resigned"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="staff_name" placeholder="Staff Full Name"/></h1>
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <h3><field name="employee_number" placeholder="Emp ID e.g. EMP-001"/></h3>
+                            </div>
+                            <div class="col-auto">
+                                <h3><field name="sequence_number" class="text-muted"/></h3>
+                            </div>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Employment &amp; Supervisor Details">
+                            <field name="alias"/>
+                            <field name="position"/>
+                            <field name="work_location"/>
+                            <field name="project_id"/>
+                            <field name="commence_date"/>
+                            <field name="supervisor_email" placeholder="supervisor@company.com" widget="email"/>
+                            <field name="is_transfer"/>
+                            <field name="transfer_from" invisible="not is_transfer" placeholder="e.g. Previous Department / Subsidiary"/>
+                        </group>
+                        <group string="IT Assets &amp; Accounts">   
+                            <field name="mobile_phone" widget="phone"/>
+                            <field name="email_login"/>
+                            <field name="initial_password"/>
+                            <field name="project_email"/>
+                            <field name="m365_license_assigned"/>
+                            <field name="m365_license_type" invisible="not m365_license_assigned"/>
+                            <field name="computer_assigned"/>
+                            <field name="remark" placeholder="Enter remarks..."/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Resignation &amp; Offboarding" invisible="status != 'resigned'">
+                            <group>
+                                <group>
+                                    <field name="resignation_date"/>
+                                    <field name="assets_returned"/>
+                                    <field name="m365_revoked"/>
+                                </group>
+                            </group>
+                            <group string="Offboarding Notes">
+                                <field name="offboarding_notes" placeholder="Enter exit interview / asset recovery notes..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- 3. Pivot View Grouped by Work Location and Showing Movement -->
+    <record id="view_it_staff_onboard_pivot" model="ir.ui.view">
+        <field name="name">it.staff.onboard.pivot</field>
+        <field name="model">it.staff.onboard</field>
+        <field name="arch" type="xml">
+            <pivot string="Staff Location &amp; Movement Analysis" sample="1">
+                <!-- Group By Rows: Work Location -->
+                <field name="work_location" type="row"/>
+                <!-- Group By Columns: Status breakdown -->
+                <field name="status" type="col"/>
+                <!-- Measures: Aggregated Movement Counts -->
+                <field name="count_onboard" type="measure"/>
+                <field name="count_offboard" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- 4. Graph View -->
+    <record id="view_it_staff_onboard_graph" model="ir.ui.view">
+        <field name="name">it.staff.onboard.graph</field>
+        <field name="model">it.staff.onboard</field>
+        <field name="arch" type="xml">
+            <graph string="Staff Movement by Work Location" type="bar" stacked="True" sample="1">
+                <field name="work_location"/>
+                <field name="status"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- 5. Main Action for List View -->
+    <record id="action_it_staff_onboard" model="ir.actions.act_window">
+        <field name="name">IT Staff Onboarding</field>
+        <field name="res_model">it.staff.onboard</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new IT Staff Onboarding Record!
+            </p>
+        </field>
+    </record>
+
+    <!-- 6. Reporting Action (Opens directly in Pivot mode) -->
+    <record id="action_it_staff_onboard_report" model="ir.actions.act_window">
+        <field name="name">Location &amp; Movement Reporting</field>
+        <field name="res_model">it.staff.onboard</field>
+        <field name="view_mode">pivot,graph</field>
+    </record>
+
+    <!-- 7. Menu Structure -->
+    <!-- Top Level App Icon -->
+    <menuitem id="menu_it_staff_root"
+              name="IT Staff Mgmt"
+              web_icon="it_staff_onboarding,static/description/icon.png"
+              sequence="10"/>
+
+    <!-- Category Submenus -->
+    <menuitem id="menu_it_staff_main"
+              name="Onboarding"
+              parent="menu_it_staff_root"
+              sequence="10"/>
+
+    <menuitem id="menu_it_staff_reporting"
+              name="Reporting"
+              parent="menu_it_staff_root"
+              sequence="20"/>
+
+    <!-- Menu Actions -->
+    <menuitem id="menu_it_staff_records"
+              name="Staff Records"
+              parent="menu_it_staff_main"
+              action="action_it_staff_onboard"
+              sequence="10"/>
+
+    <menuitem id="menu_it_staff_pivot_report"
+              name="Location Movement Analysis"
+              parent="menu_it_staff_reporting"
+              action="action_it_staff_onboard_report"
+              sequence="10"/>
+
+</odoo>

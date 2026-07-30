@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Public DN View & Signature Form -->
+    <template id="dn_confirmation_page" name="Delivery Confirmation">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="container my-5">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Delivery Confirmation: <t t-esc="picking.name"/></h3>
+                            <span t-if="picking.signature" class="badge bg-success fs-6">Already Signed</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Details -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5>Customer Details</h5>
+                                    <p class="mb-1"><strong t-esc="picking.partner_id.name"/></p>
+                                    <p class="text-muted"><t t-esc="picking.partner_id.contact_address"/></p>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <p class="mb-1"><strong>Scheduled Date:</strong> <span t-field="picking.scheduled_date"/></p>
+                                    <p class="mb-1"><strong>Source Document:</strong> <span t-field="picking.origin"/></p>
+                                </div>
+                            </div>
+
+                            <!-- Products Table -->
+                            <h5>Delivered Items</h5>
+                            <table class="table table-bordered mb-4">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="picking.move_ids_without_package" t-as="move">
+                                        <td><t t-esc="move.product_id.display_name"/></td>
+                                        <td class="text-end"><t t-esc="move.quantity"/> <t t-esc="move.product_uom.name"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- If Already Signed -->
+                            <div t-if="picking.signature" class="alert alert-info">
+                                <h5>Signature Record</h5>
+                                <p class="mb-1">Signed by: <strong t-esc="picking.signed_by"/></p>
+                                <p class="mb-2">Signed on: <span t-field="picking.signed_on"/></p>
+                                <img t-attf-src="data:image/png;base64,#{picking.signature}" style="max-height: 150px;" class="border p-2 bg-white"/>
+                            </div>
+
+                            <!-- Signature Form (If not signed yet) -->
+                            <div t-if="not picking.signature">
+                                <h5 class="mt-4">Sign to Confirm Receipt</h5>
+                                <form t-attf-action="/dn/confirm/#{picking.access_token}/submit" method="post" id="signature_form">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="signature_data" id="signature_data"/>
+
+                                    <div class="mb-3">
+                                        <label for="signer_name" class="form-label">Full Name</label>
+                                        <input type="text" name="signer_name" id="signer_name" class="form-control" required="required" placeholder="e.g. John Doe"/>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Draw Signature</label>
+                                        <div class="border rounded bg-light p-2" style="width: 100%; max-width: 500px;">
+                                            <canvas id="signature_pad" width="480" height="200" style="border: 1px dashed #ccc; background: #fff; cursor: crosshair; touch-action: none;"></canvas>
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear_canvas">Clear</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success btn-lg" id="submit_btn">Confirm &amp; Submit</button>
+                                </form>
+
+                                <!-- Basic JS Signature Handler -->
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        var canvas = document.getElementById('signature_pad');
+                                        if (!canvas) return;
+                                        var ctx = canvas.getContext('2d');
+                                        var drawing = false;
+                                        var isBlank = true;
+
+                                        ctx.strokeStyle = "#000";
+                                        ctx.lineWidth = 2;
+
+                                        function getPos(e) {
+                                            var rect = canvas.getBoundingClientRect();
+                                            var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                                            var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                                            return { x: clientX - rect.left, y: clientY - rect.top };
+                                        }
+
+                                        function startDrawing(e) { 
+                                            drawing = true; 
+                                            isBlank = false;
+                                            ctx.beginPath(); 
+                                            var p = getPos(e); 
+                                            ctx.moveTo(p.x, p.y); 
+                                        }
+                                        function stopDrawing() { drawing = false; }
+                                        function draw(e) {
+                                            if (!drawing) return;
+                                            e.preventDefault();
+                                            var p = getPos(e);
+                                            ctx.lineTo(p.x, p.y);
+                                            ctx.stroke();
+                                        }
+
+                                        canvas.addEventListener('mousedown', startDrawing);
+                                        canvas.addEventListener('mouseup', stopDrawing);
+                                        canvas.addEventListener('mousemove', draw);
+                                        canvas.addEventListener('touchstart', startDrawing);
+                                        canvas.addEventListener('touchend', stopDrawing);
+                                        canvas.addEventListener('touchmove', draw);
+
+                                        document.getElementById('clear_canvas').addEventListener('click', function () {
+                                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                            isBlank = true;
+                                        });
+
+                                        document.getElementById('signature_form').addEventListener('submit', function (e) {
+                                            if (isBlank) {
+                                                e.preventDefault();
+                                                alert("Please provide a signature before submitting.");
+                                                return false;
+                                            }
+                                            var dataURL = canvas.toDataURL('image/png');
+                                            document.getElementById('signature_data').value = dataURL;
+                                        });
+                                    });
+                                </script>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Thank You Page Template -->
+    <template id="dn_thank_you_page" name="Signature Received">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="container my-5 text-center">
+                    <div class="alert alert-success py-5 shadow-sm">
+                        <h2><i class="fa fa-check-circle text-success mb-3" style="font-size: 48px;"></i></h2>
+                        <h3>Thank You!</h3>
+                        <p class="lead">Your confirmation and signature for Delivery Note <strong><t t-esc="picking.name"/></strong> have been recorded successfully.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

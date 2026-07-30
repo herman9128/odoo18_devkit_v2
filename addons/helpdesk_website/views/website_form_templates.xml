@@ -12,7 +12,8 @@
                     <div class="container px-3 px-md-0">
                         <div class="row justify-content-center">
                             <!-- col-12 ensures 100% width on mobile, col-lg-8 centers on desktop -->
-                            <div class="col-12 col-md-10 col-lg-8">
+                        <div class="col-12 col-md-10 col-lg-8">
+                           
                                 <h1 class="mb-4 text-center text-md-start fs-2 fs-md-1">Submit a Support Ticket</h1>
                                 
                                 <form

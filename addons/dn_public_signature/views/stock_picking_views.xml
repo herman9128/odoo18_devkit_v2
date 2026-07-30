@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_public_signature" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.public.signature</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Insert button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_copy_public_url" 
+                        string="Copy Signature Link" 
+                        type="object" 
+                        class="btn-secondary" 
+                        icon="fa-clone"/>
+                <!-- Visual statusbar widget -->
+                <field name="signature_state" widget="statusbar" statusbar_visible="pending,signed"/>
+            </xpath>
+
+            <!-- Show fields in form body -->
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="access_token" widget="CopyClipboardChar" string="Public Signature Link" readonly="1"/>
+                <field name="signature_state" widget="badge" 
+                       decoration-info="signature_state == 'pending'" 
+                       decoration-success="signature_state == 'signed'"/>
+                <field name="signed_by" readonly="1" invisible="not signature"/>
+                <field name="signed_on" readonly="1" invisible="not signature"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
