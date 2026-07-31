@@ -23,7 +23,7 @@
         </field>
     </record>
 
-    <!-- 2. Form View -->
+<!-- 2. Form View -->
     <record id="view_it_staff_onboard_form" model="ir.ui.view">
         <field name="name">it.staff.onboard.form</field>
         <field name="model">it.staff.onboard</field>
@@ -32,8 +32,13 @@
                 <header>
                     <button name="action_activate" type="object" string="Confirm Onboard" class="oe_highlight" invisible="status != 'draft'"/>
                     <button name="action_send_supervisor_email" type="object" string="Send Email to Supervisor" class="btn-primary" icon="fa-envelope"/>
-                    <button name="action_resign" type="object" string="Mark as Resigned" class="btn-danger" invisible="status == 'resigned'"/>
-                    <button name="action_reactivate" type="object" string="Reactivate Staff" class="btn-warning" invisible="status == 'resigned'"/>
+                    
+                    <!-- Show "Mark as Resigned" ONLY when the record is Active -->
+                    <button name="action_resign" type="object" string="Mark as Resigned" class="btn-danger" invisible="status != 'active'"/>
+                    
+                    <!-- Show "Reactivate Staff" ONLY when the record IS Resigned -->
+                    <button name="action_reactivate" type="object" string="Reactivate Staff" class="btn-warning" invisible="status != 'resigned'"/>
+                    
                     <field name="status" widget="statusbar" statusbar_visible="draft,active,resigned"/>
                 </header>
                 <sheet>
@@ -91,17 +96,14 @@
         </field>
     </record>
 
-    <!-- 3. Pivot View Grouped by Work Location and Showing Movement -->
+    <!-- 3. Pivot View -->
     <record id="view_it_staff_onboard_pivot" model="ir.ui.view">
         <field name="name">it.staff.onboard.pivot</field>
         <field name="model">it.staff.onboard</field>
         <field name="arch" type="xml">
             <pivot string="Staff Location &amp; Movement Analysis" sample="1">
-                <!-- Group By Rows: Work Location -->
                 <field name="work_location" type="row"/>
-                <!-- Group By Columns: Status breakdown -->
                 <field name="status" type="col"/>
-                <!-- Measures: Aggregated Movement Counts -->
                 <field name="count_onboard" type="measure"/>
                 <field name="count_offboard" type="measure"/>
             </pivot>
@@ -120,11 +122,77 @@
         </field>
     </record>
 
-    <!-- 5. Main Action for List View -->
+    <!-- 5. Search View -->
+    <record id="view_it_staff_onboard_search" model="ir.ui.view">
+        <field name="name">it.staff.onboard.search</field>
+        <field name="model">it.staff.onboard</field>
+        <field name="arch" type="xml">
+            <search string="Search Onboarding Records">
+                <field name="staff_name"/>
+                <field name="employee_number"/>
+                <field name="work_location"/>
+                <field name="commence_date"/>
+
+                <separator/>
+                <!-- Status Filters -->
+                <filter string="Active" name="filter_active" domain="[('status', '=', 'active')]"/>
+                <filter string="Resigned" name="filter_resigned" domain="[('status', '=', 'resigned')]"/>
+
+                <separator/>
+                <!-- Single Month Filters -->
+                <filter string="Commenced This Month" name="commence_this_month"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today()).strftime('%Y-%m-01')),
+                            ('commence_date', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))
+                        ]"/>
+
+                <filter string="Commenced Last Month" name="commence_last_month"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')),
+                            ('commence_date', '&lt;', (context_today()).strftime('%Y-%m-01'))
+                        ]"/>
+
+                <filter string="Commenced 3 Months Ago" name="commence_3_months_ago"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today() - relativedelta(months=2)).strftime('%Y-%m-01')),
+                            ('commence_date', '&lt;', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01'))
+                        ]"/>
+
+                <separator/>
+                <!-- Range-Based Filters -->
+                <filter string="Commenced Last 3 Months" name="commence_last_3_months"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today() - relativedelta(months=2)).strftime('%Y-%m-01')),
+                            ('commence_date', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))
+                        ]"/>
+
+                <filter string="Commenced This Year" name="commence_this_year"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today()).strftime('%Y-01-01')),
+                            ('commence_date', '&lt;=', (context_today()).strftime('%Y-12-31'))
+                        ]"/>
+
+                <filter string="Commenced Last Year" name="commence_last_year"
+                        domain="[
+                            ('commence_date', '&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-01-01')),
+                            ('commence_date', '&lt;=', (context_today() - relativedelta(years=1)).strftime('%Y-12-31'))
+                        ]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Work Location" name="group_by_location" context="{'group_by': 'work_location'}"/>
+                    <filter string="Commence Month" name="group_by_commence_date" context="{'group_by': 'commence_date:month'}"/>
+                    <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 6. Main Action for List View -->
     <record id="action_it_staff_onboard" model="ir.actions.act_window">
         <field name="name">IT Staff Onboarding</field>
         <field name="res_model">it.staff.onboard</field>
         <field name="view_mode">list,pivot,graph,form</field>
+        <field name="search_view_id" ref="view_it_staff_onboard_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new IT Staff Onboarding Record!
@@ -132,21 +200,21 @@
         </field>
     </record>
 
-    <!-- 6. Reporting Action (Opens directly in Pivot mode) -->
+    <!-- 7. Reporting Action -->
     <record id="action_it_staff_onboard_report" model="ir.actions.act_window">
         <field name="name">Location &amp; Movement Reporting</field>
         <field name="res_model">it.staff.onboard</field>
         <field name="view_mode">pivot,graph</field>
+        <field name="search_view_id" ref="view_it_staff_onboard_search"/>
+        <field name="domain">[('status', 'in', ['active', 'resigned'])]</field>
     </record>
 
-    <!-- 7. Menu Structure -->
-    <!-- Top Level App Icon -->
+    <!-- 8. Menu Structure -->
     <menuitem id="menu_it_staff_root"
               name="IT Staff Mgmt"
               web_icon="it_staff_onboarding,static/description/icon.png"
               sequence="10"/>
 
-    <!-- Category Submenus -->
     <menuitem id="menu_it_staff_main"
               name="Onboarding"
               parent="menu_it_staff_root"
@@ -157,7 +225,6 @@
               parent="menu_it_staff_root"
               sequence="20"/>
 
-    <!-- Menu Actions -->
     <menuitem id="menu_it_staff_records"
               name="Staff Records"
               parent="menu_it_staff_main"

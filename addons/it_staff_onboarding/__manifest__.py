@@ -6,12 +6,13 @@
     'depends': ['base', 'mail','project'],  # Inherits mail chatter and optionally core HR
     'data': [
         'security/ir.model.access.csv',
-        'views/staff_onboard_views.xml',
         'data/ir_sequence_data.xml',
+        'views/staff_onboard_views.xml',
         'data/mail_template_data.xml',
     ],
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
 }
+
 

@@ -42,10 +42,15 @@ class ITStaffOnboard(models.Model):
 
     # Status Field
     status = fields.Selection([
-        ('draft', 'Draft'),
         ('active', 'Active'),
-        ('resigned', 'Resigned')
-    ], string='Status', default='draft', required=True, tracking=True)
+        ('resigned', 'Resigned'),
+        ('draft', 'Draft'),
+    ], string='Status', default='draft', required=True, group_expand='_read_group_status')
+
+    @api.model
+    def _read_group_status(self, stages, domain, order):
+        # Explicitly return the exact order for columns
+        return ['active', 'resigned', 'draft']
 
     # Computed Fields for Pivot Analysis
     count_onboard = fields.Integer(
@@ -72,21 +77,34 @@ class ITStaffOnboard(models.Model):
                 rec.count_onboard = 0
                 rec.count_offboard = 0
 
-    # Sequence Generation on Create
-    @api.model
-    def create(self, vals):
-        if vals.get('sequence_number', 'New') == 'New':
-            vals['sequence_number'] = self.env['ir.sequence'].next_by_code('it.staff.onboard') or 'New'
-        return super(ITStaffOnboard, self).create(vals)
+    # Odoo 17/18 batch-compatible create override
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('sequence_number', 'New') == 'New':
+                vals['sequence_number'] = self.env['ir.sequence'].next_by_code('it.staff.onboard') or 'New'
+        return super(ITStaffOnboard, self).create(vals_list)
 
     def action_activate(self):
         self.write({'status': 'active'})
 
     def action_resign(self):
-        self.write({'status': 'resigned'})
+        # Automatically capture resignation date if not set
+        for rec in self:
+            vals = {'status': 'resigned'}
+            if not rec.resignation_date:
+                vals['resignation_date'] = fields.Date.today()
+            rec.write(vals)
 
     def action_reactivate(self):
-        self.write({'status': 'active'})
+        """Reactivates a resigned staff member and clears offboarding flags."""
+        for record in self:
+            record.write({
+                'status': 'active',
+                'resignation_date': False,
+                'assets_returned': False,
+                'm365_revoked': False,
+            })
 
     def action_send_supervisor_email(self):
         """Triggers the XML template email to the supervisor."""
@@ -101,7 +119,7 @@ class ITStaffOnboard(models.Model):
         if not template:
             raise UserError(_("Email template 'email_template_supervisor_onboard_notice' could not be found."))
 
-        # Send email immediately using the template context
+        # Send email using template
         template.send_mail(self.id, force_send=True)
 
         # Log confirmation in Chatter
