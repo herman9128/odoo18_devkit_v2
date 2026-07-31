@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- 1. List View -->
-    <record id="view_it_staff_onboard_tree" model="ir.ui.view">
+<record id="view_it_staff_onboard_tree" model="ir.ui.view">
         <field name="name">it.staff.onboard.list</field>
         <field name="model">it.staff.onboard</field>
         <field name="arch" type="xml">
@@ -10,11 +10,12 @@
                 <field name="sequence_number"/>
                 <field name="employee_number"/>
                 <field name="staff_name"/>
+                <field name="alias"/>
                 <field name="position"/>
                 <field name="work_location"/>
                 <field name="commence_date"/>
                 <field name="email_login"/>
-                <field name="supervisor_email"/>
+                <field name="computer_assigned"/> <!-- Added field here -->
                 <field name="status" widget="badge" 
                        decoration-info="status == 'draft'" 
                        decoration-success="status == 'active'" 
